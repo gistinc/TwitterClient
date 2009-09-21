@@ -1,0 +1,12 @@
+- TwitterIdFetcher.getIds() should be called asynchronously.
+  Currently the stream processing is interrupted and doesn't resume
+  until we've fetched the next set of twitter ids.  The ids should be
+  fetched asynchronously and handed off to the processing threads.
+
+- TwitterIdFetcher.getIds() may have a partial failure, i.e., it may
+  only successfully fetch ids from a subset of sources.  In that case,
+  we should proceeed to follow those ids, but should retry the
+  complete fetch periodically instead of waiting for the end of the
+  processing interval.
+
+- Add support for setting the "delimited" parameter.
