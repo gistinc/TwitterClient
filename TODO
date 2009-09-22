@@ -10,3 +10,5 @@
   processing interval.
 
 - Add support for setting the "delimited" parameter.
+
+- Tests.
