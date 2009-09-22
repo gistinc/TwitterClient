@@ -1,3 +1,4 @@
 #!/bin/sh
 
-java -cp build:`echo lib/*.jar | tr ' ' ':'` example.Example "$@"
+java -cp build-example:`echo lib/*.jar dist/*.jar | tr ' ' ':'` \
+  example.Example "$@"

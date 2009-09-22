@@ -1,4 +1,0 @@
-#!/bin/sh
-
-mkdir -p build
-javac -d build -cp src:`echo lib/*.jar | tr ' ' ':'` src/example/Example.java
