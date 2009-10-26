@@ -25,7 +25,14 @@ import java.util.Collection;
  */
 public interface FilterParameterFetcher {
     /**
-     * @return a collection of twitter ids to follow
+     * @return a collection of twitter ids to follow, or null for no
+     *   id filtering.
      */
     Collection<String> getFollowIds();
+
+    /**
+     * @return a collection of keywords to track, or null for no
+     *   keyword filtering.
+     */
+    Collection<String> getTrackKeywords();
 }

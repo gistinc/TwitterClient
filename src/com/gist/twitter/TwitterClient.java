@@ -59,6 +59,7 @@ public class TwitterClient {
     private final TwitterStreamProcessor twitterStreamProcessor;
     private final String baseUrl;
     private final int maxFollowIdsPerCredentials;
+    private final int maxTrackKeywordsPerCredentials;
     private final Collection<UsernamePasswordCredentials> credentials;
     private final long processForMillis;
 
@@ -67,12 +68,15 @@ public class TwitterClient {
     /**
      * Constructs a TwitterClient.
      *
-     * @param filterParameterFetcher used to get twitter ids to follow.  The
-     *   getFollowIds() method will be called periodically to refresh the ids.
+     * @param filterParameterFetcher used to get twitter ids to
+     *   follow.  The getFollowIds() and getTrackKeywords() methods
+     *   will be called periodically to refresh the ids and keywords.
      * @param twitterStreamProcessor processes the twitter stream
      * @param baseUrl url of the twitter stream
      * @param maxFollowIdsPerCredentials maximum number of twitter ids
      *   we can follow with one set of credentials
+     * @param maxTrackKeywordsPerCredentials maximum number of
+     *   keywords we can track with one set of credentials
      * @param credentials credentials to connect with, in the form
      *   "username:password".  Multiple credentials can be used to follow
      *   large numbers of twitter ids.
@@ -84,6 +88,7 @@ public class TwitterClient {
         TwitterStreamProcessor twitterStreamProcessor,
         String baseUrl,
         int maxFollowIdsPerCredentials,
+        int maxTrackKeywordsPerCredentials,
         Collection<String> credentials,
         long processForMillis) {
 
@@ -91,6 +96,7 @@ public class TwitterClient {
         this.twitterStreamProcessor = twitterStreamProcessor;
         this.baseUrl = baseUrl;
         this.maxFollowIdsPerCredentials = maxFollowIdsPerCredentials;
+        this.maxTrackKeywordsPerCredentials = maxTrackKeywordsPerCredentials;
         this.credentials = createCredentials(credentials);
         this.processForMillis = processForMillis;
 
@@ -143,32 +149,38 @@ public class TwitterClient {
      * threads and return.
      */
     private void processForATime() {
-        Collection<String> followIds = filterParameterFetcher.getFollowIds();
+        Collection<String> followIds =
+            filterParameterFetcher.getFollowIds();
+        Collection<HashSet<String>> followIdSets =
+            createSets(followIds, maxFollowIdsPerCredentials);
 
-        // Distribute ids somewhat evenly among credentials to test
-        // multiple threads.
-        int batchSize = Math.min(followIds.size() / credentials.size() + 1,
-            maxFollowIdsPerCredentials);
+        Collection<String> trackKeywords =
+            filterParameterFetcher.getTrackKeywords();
+        Collection<HashSet<String>> trackKeywordSets =
+            createSets(trackKeywords, maxTrackKeywordsPerCredentials);
 
         Collection<Thread> threads = new ArrayList<Thread>();
 
-        Iterator<String> followIdIterator = followIds.iterator();
-        for (UsernamePasswordCredentials upc : credentials) {
-            HashSet<String> idBatch = new HashSet<String>(batchSize);
-            for (int i = 0; i < batchSize && followIdIterator.hasNext(); i++) {
-                idBatch.add(followIdIterator.next());
-            }
+        Iterator<UsernamePasswordCredentials> credentialsIterator =
+            credentials.iterator();
 
-            if (idBatch.isEmpty()) {
-                break;
+        for (HashSet<String> ids : followIdSets) {
+            for (Collection<String> keywords : trackKeywordSets) {
+                if (credentialsIterator.hasNext()) {
+                    UsernamePasswordCredentials upc =
+                        credentialsIterator.next();
+                    Thread t = new Thread(
+                        new TwitterProcessor(upc, ids, keywords),
+                        "Twitter download as " + upc
+                        + " (" + threadCount.getAndIncrement() + ")");
+                    threads.add(t);
+                    t.start();
+                }
+                else {
+                    logger.warning(
+                        "Out of credentials, ignoring some ids/keywords.");
+                }
             }
-
-            Thread t = new Thread(
-                new TwitterProcessor(upc, idBatch),
-                "Twitter download as " + upc
-                + " (" + threadCount.getAndIncrement() + ")");
-            threads.add(t);
-            t.start();
         }
 
         try {
@@ -198,6 +210,37 @@ public class TwitterClient {
     }
 
     /**
+     * Divides the given collection of items into collections of at
+     * most maxPerSet.  If items is empty, an empty collection will be
+     * returned.  If items is null, a collection with a single null
+     * element will be returned.
+     */
+    private Collection<HashSet<String>> createSets(
+        Collection<String> items, int maxPerSet)
+    {
+        Collection<HashSet<String>> sets = new ArrayList<HashSet<String>>();
+
+        if (items == null) {
+            sets.add(null);
+            return sets;
+        }
+
+        HashSet<String> set = null;
+        for (String item : items) {
+            if (set == null) {
+                set = new HashSet<String>();
+                sets.add(set);
+            }
+            set.add(item);
+            if (set.size() >= maxPerSet) {
+                set = null;
+            }
+        }
+
+        return sets;
+    }
+
+    /**
      * Handles a twitter connection for one set of credentials.  Runs
      * in a separate thread, connecting, reconnecting, and processing
      * until interrupted.
@@ -209,11 +252,15 @@ public class TwitterClient {
 
         private final UsernamePasswordCredentials credentials;
         private final HashSet<String> ids;
+        private final Collection<String> keywords;
 
         public TwitterProcessor  (
-            UsernamePasswordCredentials credentials, HashSet<String> ids) {
+            UsernamePasswordCredentials credentials, HashSet<String> ids,
+            Collection<String> keywords)
+        {
             this.credentials = credentials;
             this.ids = ids;
+            this.keywords = keywords;
         }
 
         /**
@@ -297,7 +344,7 @@ public class TwitterClient {
             httpClient.getParams().setAuthenticationPreemptive(true);
 
             PostMethod postMethod = new PostMethod(baseUrl);
-            postMethod.setRequestBody(buildBody(ids));
+            postMethod.setRequestBody(makeRequestBody());
 
             logger.info(credentials + ": Connecting to " + baseUrl);
             httpClient.executeMethod(postMethod);
@@ -323,19 +370,30 @@ public class TwitterClient {
             }
         }
 
-        private NameValuePair[] buildBody(Iterable<String> ids) {
+        private NameValuePair[] makeRequestBody() {
+            Collection<NameValuePair> params = new ArrayList<NameValuePair>();
+            if (ids != null) {
+                params.add(createNameValuePair("follow", ids));
+            }
+            if (keywords != null) {
+                params.add(createNameValuePair("track", keywords));
+            }
+            return params.toArray(new NameValuePair[params.size()]);
+        }
+
+        private NameValuePair createNameValuePair(
+            String name, Collection<String> items)
+        {
             StringBuilder sb = new StringBuilder();
             boolean needComma = false;
-            for (String id : ids) {
+            for (String item : items) {
                 if (needComma) {
                     sb.append(',');
                 }
                 needComma = true;
-                sb.append(id);
+                sb.append(item);
             }
-            return new NameValuePair[] {
-                new NameValuePair("follow", sb.toString()),
-            };
+            return new NameValuePair(name, sb.toString());
         }
 
         private void resetBackOff() {

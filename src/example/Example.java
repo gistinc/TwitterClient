@@ -33,21 +33,42 @@ class Example {
     public static void main(String[] args) {
         if (args.length == 0) {
             System.err.println(
-                "Usage: Example username:password twitter_id ...");
+                "Usage: Example username:password ... [-f twitter_id ...] [-t keyword]");
             System.exit(1);
         }
 
         Collection<String> credentials = new ArrayList<String>();
-        credentials.add(args[0]);
+        Collection<String> followIds = null;
+        Collection<String> trackKeywords = null;
 
-        final Collection<String> ids = new HashSet<String>();
-        for (int i = 1; i < args.length; i++) {
-            ids.add(args[i]);
+        Collection<String> list = credentials;
+
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+            if (arg.equals("-f")) {
+                followIds = new ArrayList<String>();
+                list = followIds;
+            }
+            else if (arg.equals("-t")) {
+                trackKeywords = new ArrayList<String>();
+                list = trackKeywords;
+            }
+            else {
+                list.add(arg);
+            }
         }
+
+        final Collection<String> finalFollowIds = followIds;
+        final Collection<String> finalTrackKeywords = trackKeywords;
+
         FilterParameterFetcher filterParameterFetcher =
             new FilterParameterFetcher() {
                 public Collection<String> getFollowIds() {
-                    return ids;
+                    return finalFollowIds;
+                }
+
+                public Collection<String> getTrackKeywords() {
+                    return finalTrackKeywords;
                 }
             };
 
@@ -56,6 +77,7 @@ class Example {
             new ExampleTwitterStreamProcessor(),
             "http://stream.twitter.com/1/statuses/filter.json",
             200,
+            10,
             credentials,
             60 * 1000L).execute();
     }
