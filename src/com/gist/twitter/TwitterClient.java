@@ -55,10 +55,10 @@ public class TwitterClient {
     // For generating unique thread names for logging and thread dumps.
     private AtomicInteger threadCount = new AtomicInteger(0);
 
-    private final TwitterIdFetcher twitterIdFetcher;
+    private final FilterParameterFetcher filterParameterFetcher;
     private final TwitterStreamProcessor twitterStreamProcessor;
     private final String baseUrl;
-    private final int maxIdsPerCredentials;
+    private final int maxFollowIdsPerCredentials;
     private final Collection<UsernamePasswordCredentials> credentials;
     private final long processForMillis;
 
@@ -67,12 +67,12 @@ public class TwitterClient {
     /**
      * Constructs a TwitterClient.
      *
-     * @param twitterIdFetcher used to get twitter ids to process.  The
-     *   getIds() method will be called periodically to refresh the ids.
+     * @param filterParameterFetcher used to get twitter ids to follow.  The
+     *   getFollowIds() method will be called periodically to refresh the ids.
      * @param twitterStreamProcessor processes the twitter stream
      * @param baseUrl url of the twitter stream
-     * @param maxIdsPerCredentials maximum number of twitter ids we
-     *   can follow with one set of credentials
+     * @param maxFollowIdsPerCredentials maximum number of twitter ids
+     *   we can follow with one set of credentials
      * @param credentials credentials to connect with, in the form
      *   "username:password".  Multiple credentials can be used to follow
      *   large numbers of twitter ids.
@@ -80,17 +80,17 @@ public class TwitterClient {
      *   twitter ids and reconnecting.
      */
     public TwitterClient(
-        TwitterIdFetcher twitterIdFetcher,
+        FilterParameterFetcher filterParameterFetcher,
         TwitterStreamProcessor twitterStreamProcessor,
         String baseUrl,
-        int maxIdsPerCredentials,
+        int maxFollowIdsPerCredentials,
         Collection<String> credentials,
         long processForMillis) {
 
-        this.twitterIdFetcher = twitterIdFetcher;
+        this.filterParameterFetcher = filterParameterFetcher;
         this.twitterStreamProcessor = twitterStreamProcessor;
         this.baseUrl = baseUrl;
-        this.maxIdsPerCredentials = maxIdsPerCredentials;
+        this.maxFollowIdsPerCredentials = maxFollowIdsPerCredentials;
         this.credentials = createCredentials(credentials);
         this.processForMillis = processForMillis;
 
@@ -143,20 +143,20 @@ public class TwitterClient {
      * threads and return.
      */
     private void processForATime() {
-        Collection<String> ids = twitterIdFetcher.getIds();
+        Collection<String> followIds = filterParameterFetcher.getFollowIds();
 
         // Distribute ids somewhat evenly among credentials to test
         // multiple threads.
-        int batchSize = Math.min(ids.size() / credentials.size() + 1,
-            maxIdsPerCredentials);
+        int batchSize = Math.min(followIds.size() / credentials.size() + 1,
+            maxFollowIdsPerCredentials);
 
         Collection<Thread> threads = new ArrayList<Thread>();
 
-        Iterator<String> idIterator = ids.iterator();
+        Iterator<String> followIdIterator = followIds.iterator();
         for (UsernamePasswordCredentials upc : credentials) {
             HashSet<String> idBatch = new HashSet<String>(batchSize);
-            for (int i = 0; i < batchSize && idIterator.hasNext(); i++) {
-                idBatch.add(idIterator.next());
+            for (int i = 0; i < batchSize && followIdIterator.hasNext(); i++) {
+                idBatch.add(followIdIterator.next());
             }
 
             if (idBatch.isEmpty()) {

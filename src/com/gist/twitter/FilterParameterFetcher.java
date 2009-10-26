@@ -19,13 +19,13 @@ package com.gist.twitter;
 import java.util.Collection;
 
 /**
- * Fetches twitter ids to follow.
+ * Fetches filter parameters to pass to twitter when creating the stream.
  *
  * @author <a href="mailto:tom@gist.com">Tom May</a>
  */
-public interface TwitterIdFetcher {
+public interface FilterParameterFetcher {
     /**
      * @return a collection of twitter ids to follow
      */
-    Collection<String> getIds();
+    Collection<String> getFollowIds();
 }

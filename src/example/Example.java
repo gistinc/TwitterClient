@@ -16,8 +16,8 @@
 
 package example;
 
+import com.gist.twitter.FilterParameterFetcher;
 import com.gist.twitter.TwitterClient;
-import com.gist.twitter.TwitterIdFetcher;
 import com.gist.twitter.TwitterStreamProcessor;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -44,14 +44,15 @@ class Example {
         for (int i = 1; i < args.length; i++) {
             ids.add(args[i]);
         }
-        TwitterIdFetcher twitterIdFetcher = new TwitterIdFetcher() {
-            public Collection<String> getIds() {
-                return ids;
-            }
-        };
+        FilterParameterFetcher filterParameterFetcher =
+            new FilterParameterFetcher() {
+                public Collection<String> getFollowIds() {
+                    return ids;
+                }
+            };
 
         new TwitterClient(
-            twitterIdFetcher,
+            filterParameterFetcher,
             new ExampleTwitterStreamProcessor(),
             "http://stream.twitter.com/1/statuses/filter.json",
             200,
