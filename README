@@ -15,8 +15,8 @@ TwitterClient is constructed with two helper objects.  This
 functionality has been factored out since it's likely to vary wildly
 according to need.
 
-- A TwitterIdFetcher is called peridoically to get the set of Twitter ids
-  to follow.
+- A FilterParameterFetcher is called periodically to get the set of
+  Twitter ids to follow and keywords to track.
 
 - A TwitterStreamProcessor processes the actual data stream.  How this
   is done and how you filter and process the results are up to you.
