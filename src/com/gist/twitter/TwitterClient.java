@@ -19,6 +19,7 @@ package com.gist.twitter;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -278,6 +279,14 @@ public class TwitterClient {
                     }
                     try {
                         connectAndProcess();
+                    }
+                    catch (SocketTimeoutException ex) {
+                        // Handle like an IOException even though it's
+                        // an InterruptedIOException.
+                        logger.log(Level.WARNING,
+                            credentials + ": Error fetching from " + baseUrl,
+                            ex);
+                        tcpBackOff.backOff();
                     }
                     catch (InterruptedException ex) {
                         // Don't let this be handled as a generic Exception.
