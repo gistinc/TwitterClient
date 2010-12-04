@@ -63,6 +63,7 @@ public class TwitterClient {
     private final int maxTrackKeywordsPerCredentials;
     private final Collection<UsernamePasswordCredentials> credentials;
     private final long processForMillis;
+    private boolean delimited;
 
     private final AuthScope authScope;
 
@@ -107,6 +108,10 @@ public class TwitterClient {
         catch (URIException ex) {
             throw new IllegalArgumentException("Invalid url: " + baseUrl, ex);
         }
+    }
+
+    public void setDelimited(boolean delimited) { 
+        this.delimited = delimited;
     }
 
     /**
@@ -393,6 +398,9 @@ public class TwitterClient {
             }
             if (keywords != null) {
                 params.add(createNameValuePair("track", keywords));
+            }
+            if (delimited) {
+                params.add(new NameValuePair("delimited", "length"));
             }
             return params.toArray(new NameValuePair[params.size()]);
         }
