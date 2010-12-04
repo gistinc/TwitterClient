@@ -172,7 +172,7 @@ public class TwitterClient {
                         credentialsIterator.next();
                     Thread t = new Thread(
                         new TwitterProcessor(upc, ids, keywords),
-                        "Twitter download as " + upc
+                        "Twitter download as " + upc.getUserName()
                         + " (" + threadCount.getAndIncrement() + ")");
                     threads.add(t);
                     t.start();
@@ -284,8 +284,9 @@ public class TwitterClient {
                         // Handle like an IOException even though it's
                         // an InterruptedIOException.
                         logger.log(Level.WARNING,
-                            credentials + ": Error fetching from " + baseUrl,
-                            ex);
+                                   credentials.getUserName()
+                                   + ": Error fetching from " + baseUrl,
+                                   ex);
                         tcpBackOff.backOff();
                     }
                     catch (InterruptedException ex) {
@@ -297,14 +298,16 @@ public class TwitterClient {
                     }
                     catch (HttpException ex) {
                         logger.log(Level.WARNING,
-                            credentials + ": Error fetching from " + baseUrl,
-                            ex);
+                                   credentials.getUserName() 
+                                   + ": Error fetching from " + baseUrl,
+                                   ex);
                         httpBackOff.backOff();
                     }
                     catch (IOException ex) {
                         logger.log(Level.WARNING,
-                            credentials + ": Error fetching from " + baseUrl,
-                            ex);
+                                   credentials.getUserName()
+                                   + ": Error fetching from " + baseUrl,
+                                   ex);
                         tcpBackOff.backOff();
                     }
                     catch (Exception ex) {
@@ -312,8 +315,9 @@ public class TwitterClient {
                         // something.  Open a new connection to
                         // resync.
                         logger.log(Level.WARNING,
-                            credentials + ": Error fetching from " + baseUrl,
-                            ex);
+                                   credentials.getUserName() 
+                                   + ": Error fetching from " + baseUrl,
+                                   ex);
                     }
                 }
             }
@@ -355,7 +359,8 @@ public class TwitterClient {
             PostMethod postMethod = new PostMethod(baseUrl);
             postMethod.setRequestBody(makeRequestBody());
 
-            logger.info(credentials + ": Connecting to " + baseUrl);
+            logger.info(credentials.getUserName() 
+                        + ": Connecting to " + baseUrl);
             httpClient.executeMethod(postMethod);
             try {
                 if (postMethod.getStatusCode() != HttpStatus.SC_OK) {
@@ -365,11 +370,13 @@ public class TwitterClient {
                 InputStream is = postMethod.getResponseBodyAsStream();
                 // We've got a successful connection.
                 resetBackOff();
-                logger.info(credentials + ": Processing from " + baseUrl);
+                logger.info(credentials.getUserName() 
+                            + ": Processing from " + baseUrl);
                 twitterStreamProcessor.processTwitterStream(
                     is, credentials.toString(), ids);
-                logger.info(credentials + ": Completed processing from "
-                    + baseUrl);
+                logger.info(credentials.getUserName() 
+                            + ": Completed processing from "
+                            + baseUrl);
             } finally {
                 // Abort the method, otherwise releaseConnection() will
                 // attempt to finish reading the never-ending response.
