@@ -26,24 +26,24 @@ import java.util.HashSet;
  * @author Elmer Garduno
  */
 public abstract class DelimitedTwitterStreamProcessor
-  implements TwitterStreamProcessor {
+    implements TwitterStreamProcessor {
 
     public void processTwitterStream(InputStream is, String credentials,
                                      HashSet<String> ids)
-      throws InterruptedException, IOException {
-      DataInputStream in = new DataInputStream(is);
-      while (true) {
-        byte[] bl = new byte[10];
-        if (readLine(in, bl, 0, bl.length) == -1) {
-          throw new EOFException();
+        throws InterruptedException, IOException {
+        DataInputStream in = new DataInputStream(is);
+        while (true) {
+            byte[] bl = new byte[10];
+            if (readLine(in, bl, 0, bl.length) == -1) {
+                throw new EOFException();
+            }
+            String lengthBytes = new String(bl).trim();
+            if (lengthBytes.length() > 0) {
+                byte[] bytes = new byte[Integer.parseInt(lengthBytes)];
+                in.readFully(bytes);
+                processTwitterUpdate(bytes, credentials, ids);
+            }
         }
-        String lengthBytes = new String(bl).trim();
-        if (lengthBytes.length() > 0) {
-          byte[] bytes = new byte[Integer.parseInt(lengthBytes)];
-          in.readFully(bytes);
-          processTwitterUpdate(bytes, credentials, ids);
-        }
-      }
     }
    
 
@@ -62,14 +62,15 @@ public abstract class DelimitedTwitterStreamProcessor
                                                   HashSet<String> ids)
        throws InterruptedException, IOException;
 
+
     /*
      * Originally found in apache-tomcat-6.0.26
      * org.apache.tomcat.util.net.TcpConnection
      * Licensed under the Apache License, Version 2.0
      */
     private int readLine(InputStream in, byte[] b, int off, int len)
-      throws IOException {
-	if (len <= 0) {
+        throws IOException {
+        if (len <= 0) {
 	    return 0;
 	}
 	int count = 0, c;
