@@ -63,7 +63,7 @@ public class TwitterClient {
     private final int maxTrackKeywordsPerCredentials;
     private final Collection<UsernamePasswordCredentials> credentials;
     private final long processForMillis;
-    private boolean delimited;
+    private final boolean delimited;
 
     private final AuthScope authScope;
 
@@ -92,7 +92,8 @@ public class TwitterClient {
         int maxFollowIdsPerCredentials,
         int maxTrackKeywordsPerCredentials,
         Collection<String> credentials,
-        long processForMillis) {
+        long processForMillis, 
+        boolean delimited) {
 
         this.filterParameterFetcher = filterParameterFetcher;
         this.twitterStreamProcessor = twitterStreamProcessor;
@@ -101,6 +102,7 @@ public class TwitterClient {
         this.maxTrackKeywordsPerCredentials = maxTrackKeywordsPerCredentials;
         this.credentials = createCredentials(credentials);
         this.processForMillis = processForMillis;
+        this.delimited = delimited;
 
         try {
             authScope = createAuthScope(baseUrl);
@@ -108,10 +110,6 @@ public class TwitterClient {
         catch (URIException ex) {
             throw new IllegalArgumentException("Invalid url: " + baseUrl, ex);
         }
-    }
-
-    public void setDelimited(boolean delimited) { 
-        this.delimited = delimited;
     }
 
     /**

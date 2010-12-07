@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.gist.twitter.delimited;
+package com.gist.twitter;
 
-import com.gist.twitter.TwitterStreamProcessor;
 import java.io.EOFException;
+import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.HashSet;
-import com.google.common.io.ByteStreams;
 
 /**
  * @author Elmer Garduno
@@ -32,19 +31,18 @@ public abstract class DelimitedTwitterStreamProcessor
     public void processTwitterStream(InputStream is, String credentials,
                                      HashSet<String> ids)
       throws InterruptedException, IOException {
+      DataInputStream in = new DataInputStream(is);
       while (true) {
-        String lengthBytes;
-        do {
-          byte[] bl = new byte[10];
-          int read = readLine(is, bl, 0, bl.length);
-          if (read == -1) {
-            throw new EOFException();
-          }
-          lengthBytes = new String(bl).trim();
-        } while (lengthBytes.length() < 1);
-        byte[] bytes = new byte[Integer.parseInt(lengthBytes)];
-        ByteStreams.readFully(is, bytes);
-        processTwitterUpdate(bytes, credentials, ids);
+        byte[] bl = new byte[10];
+        if (readLine(in, bl, 0, bl.length) == -1) {
+          throw new EOFException();
+        }
+        String lengthBytes = new String(bl).trim();
+        if (lengthBytes.length() > 0) {
+          byte[] bytes = new byte[Integer.parseInt(lengthBytes)];
+          in.readFully(bytes);
+          processTwitterUpdate(bytes, credentials, ids);
+        }
       }
     }
    
@@ -69,7 +67,7 @@ public abstract class DelimitedTwitterStreamProcessor
      * org.apache.tomcat.util.net.TcpConnection
      * Licensed under the Apache License, Version 2.0
      */
-    public int readLine(InputStream in, byte[] b, int off, int len)
+    private int readLine(InputStream in, byte[] b, int off, int len)
       throws IOException {
 	if (len <= 0) {
 	    return 0;
