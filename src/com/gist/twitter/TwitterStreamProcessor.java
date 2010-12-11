@@ -37,4 +37,9 @@ public interface TwitterStreamProcessor {
     void processTwitterStream(InputStream is, String credentials,
         HashSet<String> ids)
         throws InterruptedException, IOException;
+
+    /**
+     * Returns true if it this processor consumes a delimited stream
+     */
+    boolean consumesDelimitedStream();
 }

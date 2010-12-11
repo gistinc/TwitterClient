@@ -63,7 +63,6 @@ public class TwitterClient {
     private final int maxTrackKeywordsPerCredentials;
     private final Collection<UsernamePasswordCredentials> credentials;
     private final long processForMillis;
-    private final boolean delimited;
 
     private final AuthScope authScope;
 
@@ -92,8 +91,7 @@ public class TwitterClient {
         int maxFollowIdsPerCredentials,
         int maxTrackKeywordsPerCredentials,
         Collection<String> credentials,
-        long processForMillis, 
-        boolean delimited) {
+        long processForMillis) {
 
         this.filterParameterFetcher = filterParameterFetcher;
         this.twitterStreamProcessor = twitterStreamProcessor;
@@ -102,7 +100,6 @@ public class TwitterClient {
         this.maxTrackKeywordsPerCredentials = maxTrackKeywordsPerCredentials;
         this.credentials = createCredentials(credentials);
         this.processForMillis = processForMillis;
-        this.delimited = delimited;
 
         try {
             authScope = createAuthScope(baseUrl);
@@ -397,7 +394,7 @@ public class TwitterClient {
             if (keywords != null) {
                 params.add(createNameValuePair("track", keywords));
             }
-            if (delimited) {
+            if (twitterStreamProcessor.consumesDelimitedStream()) {
                 params.add(new NameValuePair("delimited", "length"));
             }
             return params.toArray(new NameValuePair[params.size()]);

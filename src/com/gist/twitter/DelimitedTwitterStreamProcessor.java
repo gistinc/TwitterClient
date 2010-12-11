@@ -46,6 +46,9 @@ public abstract class DelimitedTwitterStreamProcessor
         }
     }
    
+    public boolean consumesDelimitedStream() {
+        return true;
+    }
 
     /**
      * Processes the twitter stream until it's interrupted or gets an
