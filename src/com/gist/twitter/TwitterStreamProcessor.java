@@ -18,7 +18,7 @@ package com.gist.twitter;
 
 import java.io.InputStream;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:tom@gist.com">Tom May</a>
@@ -35,7 +35,7 @@ public interface TwitterStreamProcessor {
      * @param ids the twitter ids this stream is following
      */
     void processTwitterStream(InputStream is, String credentials,
-        HashSet<String> ids)
+        Set<String> ids)
         throws InterruptedException, IOException;
 
     /**

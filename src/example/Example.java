@@ -24,7 +24,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;;
@@ -91,7 +91,7 @@ class Example {
     private static class ExampleTwitterStreamProcessor
         extends UndelimitedTwitterStreamProcessor {
         public void processTwitterStream(InputStream is, String credentials,
-            HashSet<String> ids)
+            Set<String> ids)
             throws InterruptedException, IOException {
 
             JSONTokener jsonTokener = new JSONTokener(

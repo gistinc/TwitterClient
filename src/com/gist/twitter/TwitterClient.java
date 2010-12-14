@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -152,12 +153,12 @@ public class TwitterClient {
     private void processForATime() {
         Collection<String> followIds =
             filterParameterFetcher.getFollowIds();
-        Collection<HashSet<String>> followIdSets =
+        Collection<Set<String>> followIdSets =
             createSets(followIds, maxFollowIdsPerCredentials);
 
         Collection<String> trackKeywords =
             filterParameterFetcher.getTrackKeywords();
-        Collection<HashSet<String>> trackKeywordSets =
+        Collection<Set<String>> trackKeywordSets =
             createSets(trackKeywords, maxTrackKeywordsPerCredentials);
 
         Collection<Thread> threads = new ArrayList<Thread>();
@@ -165,7 +166,7 @@ public class TwitterClient {
         Iterator<UsernamePasswordCredentials> credentialsIterator =
             credentials.iterator();
 
-        for (HashSet<String> ids : followIdSets) {
+        for (Set<String> ids : followIdSets) {
             for (Collection<String> keywords : trackKeywordSets) {
                 if (credentialsIterator.hasNext()) {
                     UsernamePasswordCredentials upc =
@@ -216,17 +217,17 @@ public class TwitterClient {
      * returned.  If items is null, a collection with a single null
      * element will be returned.
      */
-    private Collection<HashSet<String>> createSets(
+    private Collection<Set<String>> createSets(
         Collection<String> items, int maxPerSet)
     {
-        Collection<HashSet<String>> sets = new ArrayList<HashSet<String>>();
+        Collection<Set<String>> sets = new ArrayList<Set<String>>();
 
         if (items == null) {
             sets.add(null);
             return sets;
         }
 
-        HashSet<String> set = null;
+        Set<String> set = null;
         for (String item : items) {
             if (set == null) {
                 set = new HashSet<String>();
@@ -252,11 +253,11 @@ public class TwitterClient {
         private final BackOff httpBackOff = new BackOff(10000, 240000);
 
         private final UsernamePasswordCredentials credentials;
-        private final HashSet<String> ids;
+        private final Set<String> ids;
         private final Collection<String> keywords;
 
         public TwitterProcessor  (
-            UsernamePasswordCredentials credentials, HashSet<String> ids,
+            UsernamePasswordCredentials credentials, Set<String> ids,
             Collection<String> keywords)
         {
             this.credentials = credentials;

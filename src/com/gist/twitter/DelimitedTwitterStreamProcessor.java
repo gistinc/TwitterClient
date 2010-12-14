@@ -20,7 +20,7 @@ import java.io.EOFException;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Elmer Garduno
@@ -29,7 +29,7 @@ public abstract class DelimitedTwitterStreamProcessor
     implements TwitterStreamProcessor {
 
     public void processTwitterStream(InputStream is, String credentials,
-                                     HashSet<String> ids)
+                                     Set<String> ids)
         throws InterruptedException, IOException {
         DataInputStream in = new DataInputStream(is);
         while (true) {
@@ -61,7 +61,7 @@ public abstract class DelimitedTwitterStreamProcessor
      */
      protected abstract void processTwitterUpdate(byte[] bytes, 
                                                   String credentials,
-                                                  HashSet<String> ids)
+                                                  Set<String> ids)
        throws InterruptedException, IOException;
 
 
