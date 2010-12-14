@@ -51,9 +51,8 @@ public abstract class DelimitedTwitterStreamProcessor
     }
 
     /**
-     * Processes the twitter stream until it's interrupted or gets an
-     * IOException.  This method should expect to be interrupted, and
-     * throw an InterruptedExcpetion or InterruptedIOException.
+     * Processes a twitter update.  This method should return fairly
+     * quickly.
      *
      * @param bytes the bytes to process
      * @param credentials the credentials used to create the stream,

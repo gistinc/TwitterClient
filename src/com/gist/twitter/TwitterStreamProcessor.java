@@ -27,7 +27,7 @@ public interface TwitterStreamProcessor {
     /**
      * Processes the twitter stream until it's interrupted or gets an
      * IOException.  This method should expect to be interrupted, and
-     * throw an InterruptedExcpetion or InterruptedIOException.
+     * throw an InterruptedException or InterruptedIOException.
      *
      * @param is the stream to process
      * @param credentials the credentials used to create the stream,
@@ -39,7 +39,7 @@ public interface TwitterStreamProcessor {
         throws InterruptedException, IOException;
 
     /**
-     * Returns true if it this processor consumes a delimited stream
+     * Returns true if this processor consumes a delimited stream.
      */
     boolean consumesDelimitedStream();
 }
