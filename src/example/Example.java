@@ -18,7 +18,7 @@ package example;
 
 import com.gist.twitter.FilterParameterFetcher;
 import com.gist.twitter.TwitterClient;
-import com.gist.twitter.TwitterStreamProcessor;
+import com.gist.twitter.UndelimitedTwitterStreamProcessor;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -89,7 +89,7 @@ class Example {
      * likely be put into some kind of queue system.
      */
     private static class ExampleTwitterStreamProcessor
-        implements TwitterStreamProcessor {
+        extends UndelimitedTwitterStreamProcessor {
         public void processTwitterStream(InputStream is, String credentials,
             HashSet<String> ids)
             throws InterruptedException, IOException {
