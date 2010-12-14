@@ -16,12 +16,6 @@
 
 package com.gist.twitter;
 
-import java.io.EOFException;
-import java.io.DataInputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.HashSet;
-
 /**
  * @author Elmer Garduno
  */
