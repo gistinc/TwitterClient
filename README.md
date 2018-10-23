@@ -1,15 +1,17 @@
-This is a Java client for the Twitter streaming API, documented at
+# This is a Java client for the Twitter streaming API, documented at
 
-http://apiwiki.twitter.com/Streaming-API-Documentation
+![alt text](https://help.twitter.com/content/dam/help-twitter/twitter_logo_blue.png)
 
-Source is available at
+See [Streaming API Documentation](http://apiwiki.twitter.com/Streaming-API-Documentation)
 
-http://github.com/gistinc/TwitterClient
+## Source is available at
+[Github](http://github.com/gistinc/TwitterClient)
 
+### Description
 com.gist.twitter.TwitterClient connects to Twitter using the Jakarta
-Commons HttpClient 3.1, http://hc.apache.org/httpclient-3.x/.  It
-backs off and reconnects on HTTP and TCP errors as per the spec.  It
-can connect using multiple sets of credentials at once.
+Commons HttpClient 3.1, [official doc](http://hc.apache.org/httpclient-3.x/) . 
+It backs off and reconnects on HTTP and TCP errors as per the spec. 
+It can connect using multiple sets of credentials at once.
 
 TwitterClient is constructed with two helper objects.  This
 functionality has been factored out since it's likely to vary wildly
@@ -17,7 +19,6 @@ according to need.
 
 - A FilterParameterFetcher is called periodically to get the set of
   Twitter ids to follow and keywords to track.
-
 - A TwitterStreamProcessor processes the actual data stream.  How this
   is done and how you filter and process the results are up to you.
   Twitter recommends handing off statuses via an asynchronous queueing
